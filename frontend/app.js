@@ -15,8 +15,13 @@ const detailsBody = document.getElementById("detailsBody");
 
 let detailsRequest = null;
 let detailsBusy = false;
+let allOpportunities = [];
+let listAvailable = false;
+let listRequest = null;
 
-// Display database text as text, never as executable HTML.
+const filters = createFilters();
+
+// Database values are displayed as text, never as executable HTML.
 function createElement(tag, className = "", text = "") {
   const element = document.createElement(tag);
   element.className = className;
@@ -50,24 +55,58 @@ function loadingMessage(message) {
 }
 
 async function apiRequest(path, options = {}) {
+  const controller = new AbortController();
+  const sourceSignal = options.signal;
+  let timedOut = false;
+
+  const cancelRequest = () => controller.abort();
+
+  if (sourceSignal) {
+    if (sourceSignal.aborted) {
+      controller.abort();
+    } else {
+      sourceSignal.addEventListener("abort", cancelRequest, {once: true});
+    }
+  }
+
+  const timeout = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, 10000);
+
   let response;
+  let data;
 
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
       ...options,
-      headers: {
-        Accept: "application/json",
-        ...options.headers,
-      },
+      signal: controller.signal,
+      headers: {Accept: "application/json", ...options.headers},
     });
+    data = await response.json();
   } catch (error) {
-    if (error.name === "AbortError") {
+    if (timedOut) {
+      throw new Error(
+        "Request timed out. Refresh the list to check the result before retrying."
+      );
+    }
+
+    if (sourceSignal && sourceSignal.aborted) {
       throw error;
     }
-    throw new Error("Cannot reach the server. Check that the backend is running.");
-  }
 
-  const data = await response.json();
+    if (error instanceof SyntaxError) {
+      throw new Error("The server returned an unexpected response.");
+    }
+
+    throw new Error("Cannot reach the server. Check that the backend is running.");
+  } finally {
+    clearTimeout(timeout);
+
+    if (sourceSignal) {
+      sourceSignal.removeEventListener("abort", cancelRequest);
+    }
+  }
 
   if (!response.ok) {
     const message = data.detail || "The request could not be completed.";
@@ -79,6 +118,155 @@ async function apiRequest(path, options = {}) {
   }
 
   return data;
+}
+
+function createFilters() {
+  const panel = createElement("div", "filter-panel mb-4");
+  panel.setAttribute("role", "search");
+  panel.setAttribute("aria-label", "Filter research opportunities");
+
+  const row = createElement("div", "row g-3");
+
+  function addControl(id, label, width, control) {
+    const column = createElement("div", width);
+    const heading = createElement("label", "form-label", label);
+    heading.htmlFor = id;
+    control.id = id;
+    column.append(heading, control);
+    row.append(column);
+  }
+
+  const search = createElement("input", "form-control");
+  search.type = "search";
+  search.placeholder = "Title, faculty, skills…";
+  search.setAttribute("autocomplete", "off");
+  addControl("searchInput", "Search opportunities", "col-12 col-md-6", search);
+
+  const status = createElement("select", "form-select");
+  status.append(
+    new Option("All statuses", ""),
+    new Option("Open", "Open"),
+    new Option("Closed", "Closed")
+  );
+  addControl("statusFilter", "Status", "col-6 col-md-3", status);
+
+  const area = createElement("select", "form-select");
+  area.append(new Option("All research areas", ""));
+  addControl("areaFilter", "Research area", "col-6 col-md-3", area);
+
+  const footer = createElement(
+    "div",
+    "d-flex justify-content-between align-items-center gap-3 mt-3"
+  );
+  const updated = createElement("span", "filter-caption", "Waiting for data");
+  const clear = createElement(
+    "button",
+    "btn btn-link p-0 text-decoration-none",
+    "Clear filters"
+  );
+  clear.type = "button";
+
+  footer.append(updated, clear);
+  panel.append(row, footer);
+  document.querySelector(".section-toolbar").after(panel);
+
+  search.addEventListener("input", renderOpportunities);
+  status.addEventListener("change", renderOpportunities);
+  area.addEventListener("change", renderOpportunities);
+
+  clear.addEventListener("click", () => {
+    search.value = "";
+    status.value = "";
+    area.value = "";
+    renderOpportunities();
+    search.focus();
+  });
+
+  return {search, status, area, updated, clear};
+}
+
+function setFiltersDisabled(disabled) {
+  for (const control of [
+    filters.search,
+    filters.status,
+    filters.area,
+    filters.clear,
+  ]) {
+    control.disabled = disabled;
+  }
+}
+
+function updateAreaOptions() {
+  const previous = filters.area.value;
+  const areas = [
+    ...new Set(allOpportunities.map((item) => item.research_area)),
+  ];
+
+  areas.sort((first, second) => first.localeCompare(second));
+
+  filters.area.replaceChildren(new Option("All research areas", ""));
+
+  for (const area of areas) {
+    filters.area.append(new Option(area, area));
+  }
+
+  filters.area.value = areas.includes(previous) ? previous : "";
+}
+
+function renderOpportunities() {
+  if (!listAvailable) {
+    return;
+  }
+
+  const query = filters.search.value.trim().toLowerCase();
+  const selectedStatus = filters.status.value;
+  const selectedArea = filters.area.value;
+
+  const visible = allOpportunities.filter((opportunity) => {
+    const searchable = [
+      opportunity.title,
+      opportunity.description,
+      opportunity.research_area,
+      opportunity.faculty_name,
+      opportunity.department,
+      opportunity.required_skills,
+    ].join(" ").toLowerCase();
+
+    return (
+      searchable.includes(query) &&
+      (!selectedStatus || opportunity.status === selectedStatus) &&
+      (!selectedArea || opportunity.research_area === selectedArea)
+    );
+  });
+
+  listSummary.textContent =
+    `Showing ${visible.length} of ${allOpportunities.length} opportunities`;
+
+  grid.replaceChildren();
+  emptyState.hidden = visible.length !== 0;
+  grid.hidden = visible.length === 0;
+
+  if (visible.length === 0) {
+    const noRecords = allOpportunities.length === 0;
+
+    emptyState.querySelector("h3").textContent = noRecords
+      ? "No opportunities yet"
+      : "No matching opportunities";
+
+    emptyState.querySelector("p").textContent = noRecords
+      ? "Select Add opportunity to post the first research project."
+      : "Try another search or select Clear filters.";
+
+    return;
+  }
+
+  const cards = document.createDocumentFragment();
+
+  for (const opportunity of visible) {
+    cards.append(createOpportunityCard(opportunity));
+  }
+
+  grid.append(cards);
 }
 
 function createOpportunityCard(opportunity) {
@@ -143,40 +331,61 @@ function createOpportunityCard(opportunity) {
 }
 
 async function loadOpportunities() {
+  if (listRequest) {
+    listRequest.abort();
+  }
+
+  const controller = new AbortController();
+  listRequest = controller;
+
+  listAvailable = false;
   refreshButton.disabled = true;
+  setFiltersDisabled(true);
   pageMessage.hidden = true;
   listLoading.hidden = false;
   emptyState.hidden = true;
   grid.hidden = true;
-  grid.replaceChildren();
   listSummary.textContent = "Loading opportunities…";
 
   try {
-    const opportunities = await apiRequest("/api/opportunities");
+    const opportunities = await apiRequest("/api/opportunities", {
+      signal: controller.signal,
+    });
 
-    listSummary.textContent = `${opportunities.length} ${
-      opportunities.length === 1 ? "opportunity" : "opportunities"
-    } available to view`;
-
-    if (opportunities.length === 0) {
-      emptyState.hidden = false;
+    if (controller.signal.aborted) {
       return;
     }
 
-    const cards = document.createDocumentFragment();
-    for (const opportunity of opportunities) {
-      cards.append(createOpportunityCard(opportunity));
+    if (!Array.isArray(opportunities)) {
+      throw new Error("The server returned an unexpected list response.");
     }
 
-    grid.append(cards);
-    grid.hidden = false;
+    allOpportunities = opportunities;
+    listAvailable = true;
+    updateAreaOptions();
+
+    filters.updated.textContent = `Updated ${new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    })}`;
+
+    renderOpportunities();
   } catch (error) {
+    if (controller.signal.aborted) {
+      return;
+    }
+
     pageMessage.textContent = error.message;
     pageMessage.hidden = false;
     listSummary.textContent = "Unable to load opportunities.";
+    filters.updated.textContent = "Select Refresh to try again";
   } finally {
-    listLoading.hidden = true;
-    refreshButton.disabled = false;
+    if (listRequest === controller) {
+      listRequest = null;
+      listLoading.hidden = true;
+      refreshButton.disabled = false;
+      setFiltersDisabled(!listAvailable);
+    }
   }
 }
 
@@ -185,6 +394,7 @@ function addDetail(container, label, value, fullWidth = false) {
     "div",
     fullWidth ? "col-12" : "col-12 col-sm-6"
   );
+
   column.append(
     createElement("h3", "detail-label", label),
     createElement("p", "detail-value", String(value))
@@ -274,7 +484,6 @@ function addManagementActions(container, opportunity) {
   editButton.type = "button";
 
   editButton.addEventListener("click", () => {
-    // Wait for the details modal to finish closing before opening the form.
     detailsElement.addEventListener(
       "hidden.bs.modal",
       () => window.opportunityForm.openEdit(opportunity),
@@ -343,7 +552,6 @@ async function showDetails(id) {
 
     detailsTitle.textContent = opportunity.title;
     const content = createElement("div", "row g-4");
-
     const statusColumn = createElement("div", "col-12");
     statusColumn.append(statusBadge(opportunity.status));
     content.append(statusColumn);
@@ -389,5 +597,9 @@ detailsElement.addEventListener("hide.bs.modal", (event) => {
   }
 });
 
-refreshButton.addEventListener("click", loadOpportunities);
+refreshButton.addEventListener("click", () => {
+  document.getElementById("formSuccess").hidden = true;
+  loadOpportunities();
+});
+
 loadOpportunities();

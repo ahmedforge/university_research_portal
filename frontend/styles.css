@@ -1,6 +1,6 @@
 :root {
   --portal-ink: #172b46;
-  --portal-muted: #65758b;
+  --portal-muted: #58697e;
   --portal-primary: #2458a6;
   --portal-border: #dfe6ef;
   --portal-surface: #f5f7fb;
@@ -99,12 +99,44 @@ body {
   --bs-btn-hover-border-color: var(--portal-primary);
 }
 
+.btn:focus-visible,
+.brand-name:focus-visible {
+  outline: 3px solid #719bd3;
+  outline-offset: 3px;
+}
+
+.filter-panel {
+  padding: 1.25rem;
+  border: 1px solid var(--portal-border);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.filter-caption {
+  color: var(--portal-muted);
+  font-size: 0.8rem;
+}
+
+.filter-panel .btn-link {
+  color: var(--portal-primary);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
 .opportunity-card {
   height: 100%;
   border: 1px solid var(--portal-border);
   border-radius: 16px;
   background: #fff;
   box-shadow: 0 5px 18px rgb(23 43 70 / 4%);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+@media (hover: hover) {
+  .opportunity-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgb(23 43 70 / 9%);
+  }
 }
 
 .opportunity-card .card-body {
@@ -192,6 +224,10 @@ body {
   padding: 1.25rem 1.5rem;
 }
 
+.modal-title {
+  overflow-wrap: anywhere;
+}
+
 .detail-label {
   margin-bottom: 0.3rem;
   color: var(--portal-muted);
@@ -218,7 +254,28 @@ body {
     align-items: flex-start;
   }
 
-  .opportunity-card .card-body {
+  .toolbar-actions .btn {
+    flex: 1;
+  }
+
+  .opportunity-card .card-body,
+  .filter-panel {
     padding: 1.25rem;
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opportunity-card {
+    transition: none;
+  }
+
+  .opportunity-card:hover {
+    transform: none;
   }
 }
