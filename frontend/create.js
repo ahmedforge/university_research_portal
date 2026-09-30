@@ -1,9 +1,10 @@
 "use strict";
 
-// Keep form variables separate from the opportunity-list variables.
+// The existing form supports both creation and editing.
 (() => {
   const form = document.getElementById("opportunityForm");
   const modalElement = document.getElementById("opportunityFormModal");
+  const formTitle = document.getElementById("opportunityFormTitle");
   const addButton = document.getElementById("addOpportunityButton");
   const saveButton = document.getElementById("saveOpportunityButton");
   const deadlineInput = document.getElementById("deadlineInput");
@@ -11,6 +12,7 @@
   const successMessage = document.getElementById("formSuccess");
 
   let isSaving = false;
+  let originalOpportunity = null;
 
   function todayDate() {
     const today = new Date();
@@ -33,11 +35,23 @@
     }
 
     form.setAttribute("aria-busy", String(saving));
-    saveButton.textContent = saving ? "Saving…" : "Create opportunity";
+    saveButton.textContent = saving
+      ? "Saving…"
+      : originalOpportunity
+        ? "Save changes"
+        : "Create opportunity";
+  }
+
+  function updateDeadlineMinimum() {
+    const unchangedDeadline =
+      originalOpportunity &&
+      deadlineInput.value === originalOpportunity.application_deadline;
+
+    // An expired existing deadline can remain unchanged during an edit.
+    deadlineInput.min = unchangedDeadline ? "" : todayDate();
   }
 
   function validateForm() {
-    // Trim text before checking required fields, so spaces alone are invalid.
     for (const field of form.querySelectorAll('input[type="text"], textarea')) {
       field.value = field.value.trim();
       field.setCustomValidity("");
@@ -47,7 +61,7 @@
       }
     }
 
-    deadlineInput.min = todayDate();
+    updateDeadlineMinimum();
     form.classList.add("was-validated");
 
     if (!form.checkValidity()) {
@@ -65,7 +79,7 @@
   function buildPayload() {
     const fields = new FormData(form);
 
-    return {
+    const values = {
       title: fields.get("title"),
       description: fields.get("description"),
       research_area: fields.get("research_area"),
@@ -76,6 +90,20 @@
       application_deadline: fields.get("application_deadline"),
       status: fields.get("status"),
     };
+
+    if (!originalOpportunity) {
+      return values;
+    }
+
+    // PUT accepts partial updates, so send only changed values.
+    const changes = {};
+    for (const [field, value] of Object.entries(values)) {
+      if (value !== originalOpportunity[field]) {
+        changes[field] = value;
+      }
+    }
+
+    return changes;
   }
 
   addButton.addEventListener("click", () => {
@@ -86,19 +114,40 @@
       return;
     }
 
+    originalOpportunity = null;
     bootstrap.Modal.getOrCreateInstance(modalElement).show();
   });
+
+  // A small public interface used by the details modal's Edit button.
+  window.opportunityForm = {
+    openEdit(opportunity) {
+      originalOpportunity = {...opportunity};
+      bootstrap.Modal.getOrCreateInstance(modalElement).show();
+    },
+  };
 
   modalElement.addEventListener("show.bs.modal", () => {
     form.reset();
     form.classList.remove("was-validated");
     formError.hidden = true;
     successMessage.hidden = true;
-    deadlineInput.min = todayDate();
 
     for (const field of form.querySelectorAll("input, textarea, select")) {
       field.setCustomValidity("");
     }
+
+    if (originalOpportunity) {
+      for (const field of form.querySelectorAll("[name]")) {
+        field.value = originalOpportunity[field.name];
+      }
+    }
+
+    formTitle.textContent = originalOpportunity
+      ? "Edit opportunity"
+      : "Add opportunity";
+
+    setSaving(false);
+    updateDeadlineMinimum();
   });
 
   modalElement.addEventListener("shown.bs.modal", () => {
@@ -106,11 +155,16 @@
   });
 
   modalElement.addEventListener("hide.bs.modal", (event) => {
-    // Keep the dialog open until the current save request finishes.
     if (isSaving) {
       event.preventDefault();
     }
   });
+
+  modalElement.addEventListener("hidden.bs.modal", () => {
+    originalOpportunity = null;
+  });
+
+  deadlineInput.addEventListener("input", updateDeadlineMinimum);
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -126,27 +180,37 @@
       return;
     }
 
-    // Read values before disabling the controls.
+    const editing = originalOpportunity !== null;
     const payload = buildPayload();
-    let created = null;
+
+    if (editing && Object.keys(payload).length === 0) {
+      showFormError("No changes to save. Update a field or select Cancel.");
+      return;
+    }
+
+    const path = editing
+      ? `/api/opportunities/${originalOpportunity.id}`
+      : "/api/opportunities";
+
+    let saved = null;
     setSaving(true);
 
     try {
-      created = await apiRequest("/api/opportunities", {
-        method: "POST",
+      saved = await apiRequest(path, {
+        method: editing ? "PUT" : "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(payload),
       });
     } catch (error) {
-      // Preserve entered values so the user can correct or retry the request.
       showFormError(error.message);
     } finally {
       setSaving(false);
     }
 
-    if (created) {
+    if (saved) {
       bootstrap.Modal.getOrCreateInstance(modalElement).hide();
-      successMessage.textContent = `Opportunity "${created.title}" created successfully.`;
+      successMessage.textContent =
+        `Opportunity "${saved.title}" ${editing ? "updated" : "created"} successfully.`;
       successMessage.hidden = false;
       await loadOpportunities();
     }
