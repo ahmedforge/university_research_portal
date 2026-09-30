@@ -2,14 +2,17 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.database import engine, get_db
+from app.routes.opportunities import router as opportunities_router
 
 
 @asynccontextmanager
@@ -39,6 +42,29 @@ app.add_middleware(
 )
 
 
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(
+    request: Request,
+    exc: RequestValidationError,
+) -> JSONResponse:
+    """Return readable validation errors with the assignment's 400 status."""
+    errors = [
+        {
+            "field": ".".join(str(part) for part in error["loc"]),
+            "message": error["msg"],
+        }
+        for error in exc.errors()
+    ]
+
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={
+            "detail": "Invalid request data.",
+            "errors": errors,
+        },
+    )
+
+
 @app.get("/api/health", tags=["Health"])
 def health_check(
     db: Annotated[Session, Depends(get_db)],
@@ -53,3 +79,6 @@ def health_check(
         ) from None
 
     return {"status": "ok", "database": "connected"}
+
+
+app.include_router(opportunities_router)
