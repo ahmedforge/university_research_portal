@@ -1,17 +1,21 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Annotated
+from typing import Annotated, Any
 
-from fastapi import Depends, FastAPI, HTTPException, Request, status
-from fastapi.exceptions import RequestValidationError
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.openapi.utils import get_openapi
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.database import engine, get_db
+from app.errors import (
+    ErrorResponse,
+    ValidationErrorResponse,
+    register_error_handlers,
+)
 from app.routes.opportunities import router as opportunities_router
 
 
@@ -24,48 +28,21 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
         engine.dispose()
 
 
-settings = get_settings()
-
-app = FastAPI(
+api = FastAPI(
     title="University Research Opportunity Portal",
     description="REST API for managing university research opportunities.",
     version="0.1.0",
     lifespan=lifespan,
+    responses={
+        400: {"model": ValidationErrorResponse, "description": "Invalid request"},
+        500: {"model": ErrorResponse, "description": "Internal server error"},
+    },
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[settings.frontend_origin],
-    allow_credentials=False,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["Content-Type"],
-)
+register_error_handlers(api)
 
 
-@app.exception_handler(RequestValidationError)
-async def validation_error_handler(
-    request: Request,
-    exc: RequestValidationError,
-) -> JSONResponse:
-    """Return readable validation errors with the assignment's 400 status."""
-    errors = [
-        {
-            "field": ".".join(str(part) for part in error["loc"]),
-            "message": error["msg"],
-        }
-        for error in exc.errors()
-    ]
-
-    return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content={
-            "detail": "Invalid request data.",
-            "errors": errors,
-        },
-    )
-
-
-@app.get("/api/health", tags=["Health"])
+@api.get("/api/health", tags=["Health"])
 def health_check(
     db: Annotated[Session, Depends(get_db)],
 ) -> dict[str, str]:
@@ -81,4 +58,56 @@ def health_check(
     return {"status": "ok", "database": "connected"}
 
 
-app.include_router(opportunities_router)
+api.include_router(opportunities_router)
+
+
+def custom_openapi() -> dict[str, Any]:
+    """Make the generated documentation match our actual error responses."""
+    if api.openapi_schema is not None:
+        return api.openapi_schema
+
+    schema = get_openapi(
+        title=api.title,
+        version=api.version,
+        description=api.description,
+        routes=api.routes,
+    )
+
+    for path in schema["paths"].values():
+        for operation in path.values():
+            if not isinstance(operation, dict) or "responses" not in operation:
+                continue
+
+            responses = operation["responses"]
+            responses.pop("422", None)
+
+            for code, model_name in (
+                ("400", "ValidationErrorResponse"),
+                ("404", "ErrorResponse"),
+                ("500", "ErrorResponse"),
+            ):
+                if code in responses:
+                    responses[code]["content"] = {
+                        "application/json": {
+                            "schema": {
+                                "$ref": f"#/components/schemas/{model_name}"
+                            }
+                        }
+                    }
+
+    api.openapi_schema = schema
+    return schema
+
+
+api.openapi = custom_openapi
+
+settings = get_settings()
+
+# Wrap the entire API so even unexpected 500 responses receive CORS headers.
+app = CORSMiddleware(
+    app=api,
+    allow_origins=[settings.frontend_origin],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Content-Type"],
+)
