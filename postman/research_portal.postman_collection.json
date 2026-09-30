@@ -1,0 +1,512 @@
+{
+	"info": {
+		"_postman_id": "48e0bb2d-f190-4022-b066-ac37a748be40",
+		"name": "University Research Opportunity Portal",
+		"description": "Computer Networks Assignment 01. Run requests 01 through 10 in order with one iteration. Creates three records and deletes the first; two demo records remain. No authentication or database credentials are included.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "58637915",
+		"_collection_link": "https://saimjuttchampion-5023373.postman.co/workspace/Gossips-Android's-Workspace~8f262759-ee48-4091-8a69-12a66b271c2f/collection/58637915-48e0bb2d-f190-4022-b066-ac37a748be40?action=share&source=collection_link&creator=58637915"
+	},
+	"item": [
+		{
+			"name": "01 Create networking opportunity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status is 201\", function () { pm.response.to.have.status(201); });",
+							"const body = pm.response.json();",
+							"pm.test(\"Positive integer ID\", function () { pm.expect(Number.isInteger(body.id) && body.id > 0).to.be.true; });",
+							"pm.test(\"Stored values match input\", function () { const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw)); Object.keys(sent).forEach(function (key) { pm.expect(body[key]).to.eql(sent[key]); }); });",
+							"pm.test(\"Timestamps returned\", function () { pm.expect(body.created_at).to.be.a(\"string\"); pm.expect(body.updated_at).to.be.a(\"string\"); });",
+							"if (pm.response.code === 201 && Number.isInteger(body.id) && body.id > 0) { pm.collectionVariables.set(\"portalOpportunity1Id\", String(body.id)); }"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"title\":\"Campus Network Performance Study\",\"description\":\"Measure campus network performance and investigate causes of latency.\",\"research_area\":\"Computer Networks\",\"faculty_name\":\"Dr. Demo Faculty\",\"department\":\"Computer Science\",\"required_skills\":\"Python, TCP/IP, and Wireshark\",\"positions_available\":2,\"application_deadline\":\"{{futureDeadline}}\",\"status\":\"Open\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/opportunities",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"opportunities"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "02 Create cybersecurity opportunity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status is 201\", function () { pm.response.to.have.status(201); });",
+							"const body = pm.response.json();",
+							"pm.test(\"Positive integer ID\", function () { pm.expect(Number.isInteger(body.id) && body.id > 0).to.be.true; });",
+							"pm.test(\"Stored values match input\", function () { const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw)); Object.keys(sent).forEach(function (key) { pm.expect(body[key]).to.eql(sent[key]); }); });",
+							"pm.test(\"Timestamps returned\", function () { pm.expect(body.created_at).to.be.a(\"string\"); pm.expect(body.updated_at).to.be.a(\"string\"); });",
+							"if (pm.response.code === 201 && Number.isInteger(body.id) && body.id > 0) { pm.collectionVariables.set(\"portalOpportunity2Id\", String(body.id)); }"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"title\":\"Intrusion Detection Research\",\"description\":\"Explore methods for identifying suspicious network activity.\",\"research_area\":\"Cybersecurity\",\"faculty_name\":\"Dr. Demo Faculty\",\"department\":\"Computer Science\",\"required_skills\":\"Python and network security fundamentals\",\"positions_available\":3,\"application_deadline\":\"{{futureDeadline}}\",\"status\":\"Open\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/opportunities",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"opportunities"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "03 Create data science opportunity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status is 201\", function () { pm.response.to.have.status(201); });",
+							"const body = pm.response.json();",
+							"pm.test(\"Positive integer ID\", function () { pm.expect(Number.isInteger(body.id) && body.id > 0).to.be.true; });",
+							"pm.test(\"Stored values match input\", function () { const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw)); Object.keys(sent).forEach(function (key) { pm.expect(body[key]).to.eql(sent[key]); }); });",
+							"pm.test(\"Timestamps returned\", function () { pm.expect(body.created_at).to.be.a(\"string\"); pm.expect(body.updated_at).to.be.a(\"string\"); });",
+							"if (pm.response.code === 201 && Number.isInteger(body.id) && body.id > 0) { pm.collectionVariables.set(\"portalOpportunity3Id\", String(body.id)); }"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"title\":\"Student Research Data Analysis\",\"description\":\"Analyze research participation data and present useful findings.\",\"research_area\":\"Data Science\",\"faculty_name\":\"Dr. Demo Faculty\",\"department\":\"Computer Science\",\"required_skills\":\"Python, statistics, and SQL\",\"positions_available\":1,\"application_deadline\":\"{{futureDeadline}}\",\"status\":\"Open\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/opportunities",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"opportunities"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "04 Retrieve all opportunities",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+							"pm.test(\"List includes all three created records\", function () { const body = pm.response.json(); pm.expect(body).to.be.an(\"array\"); const ids = body.map(function (item) { return item.id; }); [1, 2, 3].forEach(function (number) { const id = Number(pm.collectionVariables.get(\"portalOpportunity\" + number + \"Id\")); pm.expect(id).to.be.above(0); pm.expect(ids).to.include(id); }); });"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/opportunities",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"opportunities"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "05 Retrieve one opportunity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+							"pm.test(\"Correct record and complete details\", function () { const body = pm.response.json(); pm.expect(body.id).to.eql(Number(pm.collectionVariables.get(\"portalOpportunity1Id\"))); pm.expect(body.title).to.eql(\"Campus Network Performance Study\"); [\"description\", \"research_area\", \"faculty_name\", \"department\", \"required_skills\", \"positions_available\", \"application_deadline\", \"status\", \"created_at\", \"updated_at\"].forEach(function (field) { pm.expect(body).to.have.property(field); }); });"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/opportunities/{{portalOpportunity1Id}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"opportunities",
+						"{{portalOpportunity1Id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "06 Update opportunity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+							"pm.test(\"Changes returned and other fields preserved\", function () { const body = pm.response.json(); pm.expect(body.title).to.eql(\"Updated Campus Network Performance Study\"); pm.expect(body.required_skills).to.eql(\"Python, TCP/IP, Wireshark, and SQL\"); pm.expect(body.positions_available).to.eql(4); pm.expect(body.research_area).to.eql(\"Computer Networks\"); pm.expect(body.status).to.eql(\"Open\"); });"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"title\":\"Updated Campus Network Performance Study\",\"required_skills\":\"Python, TCP/IP, Wireshark, and SQL\",\"positions_available\":4}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/opportunities/{{portalOpportunity1Id}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"opportunities",
+						"{{portalOpportunity1Id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "07 Close opportunity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+							"pm.test(\"Status closed and prior update persisted\", function () { const body = pm.response.json(); pm.expect(body.id).to.eql(Number(pm.collectionVariables.get(\"portalOpportunity1Id\"))); pm.expect(body.status).to.eql(\"Closed\"); pm.expect(body.title).to.eql(\"Updated Campus Network Performance Study\"); pm.expect(body.positions_available).to.eql(4); });"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"status\":\"Closed\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/opportunities/{{portalOpportunity1Id}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"opportunities",
+						"{{portalOpportunity1Id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "08 Delete opportunity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+							"pm.test(\"Deletion confirmation\", function () { pm.expect(pm.response.json().message).to.eql(\"Research opportunity deleted successfully.\"); });"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/opportunities/{{portalOpportunity1Id}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"opportunities",
+						"{{portalOpportunity1Id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "09 Retrieve deleted opportunity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status is 404\", function () { pm.response.to.have.status(404); });",
+							"pm.test(\"Missing record error\", function () { pm.expect(pm.response.json().detail).to.eql(\"Research opportunity not found.\"); });"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/opportunities/{{portalOpportunity1Id}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"opportunities",
+						"{{portalOpportunity1Id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10 Reject invalid input",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status is 400\", function () { pm.response.to.have.status(400); });",
+							"pm.test(\"Validation error format\", function () { const body = pm.response.json(); pm.expect(body.detail).to.eql(\"Invalid request data.\"); pm.expect(body.errors).to.be.an(\"array\").that.is.not.empty; });",
+							"pm.test(\"Blank, missing, position, and status errors identified\", function () { const fields = pm.response.json().errors.map(function (error) { return error.field; }); pm.expect(fields).to.include.members([\"body.title\", \"body.description\", \"body.positions_available\", \"body.status\"]); });"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"title\":\"   \",\"positions_available\":0,\"status\":\"Pending\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/opportunities",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"opportunities"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"const step = Number(pm.info.requestName.slice(0, 2));",
+					"if (step === 1) { [1, 2, 3].forEach(function (number) { pm.collectionVariables.set(\"portalOpportunity\" + number + \"Id\", \"\"); }); }",
+					"const deadline = new Date();",
+					"deadline.setDate(deadline.getDate() + 30);",
+					"const date = deadline.getFullYear() + \"-\" + String(deadline.getMonth() + 1).padStart(2, \"0\") + \"-\" + String(deadline.getDate()).padStart(2, \"0\");",
+					"pm.collectionVariables.set(\"futureDeadline\", date);",
+					"pm.variables.set(\"futureDeadline\", date);",
+					"if (step >= 5 && step <= 9) { const id = pm.collectionVariables.get(\"portalOpportunity1Id\"); if (!/^[1-9][0-9]*$/.test(String(id))) { throw new Error(\"Run request 01 successfully before using this request.\"); } pm.variables.set(\"portalOpportunity1Id\", String(id)); }"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"JSON response\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"); });"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://127.0.0.1:8000",
+			"type": "string"
+		},
+		{
+			"key": "futureDeadline",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "portalOpportunity1Id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "portalOpportunity2Id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "portalOpportunity3Id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
