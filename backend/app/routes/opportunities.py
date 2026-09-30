@@ -148,3 +148,40 @@ def update_opportunity(
         ) from None
 
     return opportunity
+
+
+@router.delete(
+    "/{opportunity_id}",
+    response_model=dict[str, str],
+    responses={
+        400: {"description": "Invalid opportunity ID"},
+        404: {"description": "Opportunity not found"},
+        500: {"description": "Database operation failed"},
+    },
+)
+def delete_opportunity(
+    opportunity_id: Annotated[int, Path(ge=1, le=2147483647)],
+    db: Annotated[Session, Depends(get_db)],
+) -> dict[str, str]:
+    """Delete one opportunity and confirm the completed operation."""
+    try:
+        opportunity = db.get(ResearchOpportunity, opportunity_id)
+
+        if opportunity is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Research opportunity not found.",
+            )
+
+        db.delete(opportunity)
+        db.commit()
+    except HTTPException:
+        raise
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to delete the research opportunity.",
+        ) from None
+
+    return {"message": "Research opportunity deleted successfully."}
