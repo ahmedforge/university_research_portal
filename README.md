@@ -405,7 +405,13 @@ Check internet access because Bootstrap is loaded from a CDN.
 
 ## Screenshots
 
-Frontend screenshots will be added during final submission preparation.
+Opportunity cards, search filters, and creation feedback:
+
+![Opportunity overview](docs/portal-overview.png)
+
+Complete details with edit, close, and delete actions:
+
+![Opportunity details](docs/opportunity-details.png)
 
 ## Demonstration video
 
