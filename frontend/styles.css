@@ -1,0 +1,224 @@
+:root {
+  --portal-ink: #172b46;
+  --portal-muted: #65758b;
+  --portal-primary: #2458a6;
+  --portal-border: #dfe6ef;
+  --portal-surface: #f5f7fb;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  background: var(--portal-surface);
+  color: var(--portal-ink);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid var(--portal-border);
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--portal-ink);
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.brand-name {
+  color: var(--portal-ink);
+  font-size: 1.1rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.brand-caption {
+  color: var(--portal-muted);
+  font-size: 0.8rem;
+}
+
+.hero {
+  padding: clamp(1.75rem, 5vw, 3.5rem);
+  border-radius: 22px;
+  background: linear-gradient(120deg, #172b46, #234e7b);
+  color: #fff;
+}
+
+.eyebrow {
+  color: #b7e4dc;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  max-width: 720px;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+}
+
+.hero-description {
+  max-width: 640px;
+  color: #d7e2ee;
+  line-height: 1.7;
+}
+
+.section-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0 1.5rem;
+}
+
+.section-title {
+  font-size: 1.3rem;
+  font-weight: 750;
+}
+
+.btn {
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--portal-primary);
+  --bs-btn-border-color: var(--portal-primary);
+  --bs-btn-hover-bg: var(--portal-primary);
+  --bs-btn-hover-border-color: var(--portal-primary);
+}
+
+.opportunity-card {
+  height: 100%;
+  border: 1px solid var(--portal-border);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 5px 18px rgb(23 43 70 / 4%);
+}
+
+.opportunity-card .card-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.research-area {
+  color: var(--portal-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.opportunity-title {
+  font-size: 1.15rem;
+  font-weight: 750;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.card-description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  color: var(--portal-muted);
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.card-meta {
+  color: var(--portal-muted);
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-open {
+  background: #e5f5ed;
+  color: #187347;
+}
+
+.status-closed {
+  background: #edf0f4;
+  color: #586577;
+}
+
+.card-bottom {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--portal-border);
+}
+
+.state-panel {
+  padding: 3.5rem 1.5rem;
+  border: 1px dashed #cbd6e3;
+  border-radius: 16px;
+  background: #fff;
+  text-align: center;
+}
+
+.empty-symbol {
+  color: var(--portal-primary);
+  font-size: 2rem;
+}
+
+.modal-content {
+  border: none;
+  border-radius: 18px;
+}
+
+.modal-header,
+.modal-body,
+.modal-footer {
+  padding: 1.25rem 1.5rem;
+}
+
+.detail-label {
+  margin-bottom: 0.3rem;
+  color: var(--portal-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.detail-value {
+  margin-bottom: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.site-footer {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--portal-border);
+  color: var(--portal-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 575px) {
+  .section-toolbar {
+    align-items: flex-start;
+  }
+
+  .opportunity-card .card-body {
+    padding: 1.25rem;
+  }
+}
