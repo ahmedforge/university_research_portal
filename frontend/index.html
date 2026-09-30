@@ -13,6 +13,7 @@
     crossorigin="anonymous"
   >
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="forms.css">
 
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
@@ -21,6 +22,7 @@
     defer
   ></script>
   <script src="app.js" defer></script>
+  <script src="create.js" defer></script>
 </head>
 
 <body>
@@ -45,6 +47,7 @@
     </section>
 
     <div id="pageMessage" class="alert alert-danger" role="alert" hidden></div>
+    <div id="formSuccess" class="alert alert-success" role="status" hidden></div>
 
     <section aria-labelledby="opportunitiesHeading">
       <div class="section-toolbar">
@@ -56,9 +59,15 @@
             Loading opportunities…
           </p>
         </div>
-        <button id="refreshButton" class="btn btn-outline-primary" type="button">
-          Refresh
-        </button>
+
+        <div class="toolbar-actions">
+          <button id="refreshButton" class="btn btn-outline-primary" type="button">
+            Refresh
+          </button>
+          <button id="addOpportunityButton" class="btn btn-primary" type="button">
+            Add opportunity
+          </button>
+        </div>
       </div>
 
       <div id="listLoading" class="state-panel" role="status">
@@ -109,6 +118,190 @@
           </button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div
+    class="modal fade"
+    id="opportunityFormModal"
+    tabindex="-1"
+    aria-labelledby="opportunityFormTitle"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <form id="opportunityForm" class="modal-content" novalidate>
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="opportunityFormTitle">Add opportunity</h2>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+
+        <div class="modal-body">
+          <p class="text-secondary small mb-4">
+            Share a research project with students. All fields are required.
+          </p>
+
+          <div id="formError" class="alert alert-danger" role="alert" hidden></div>
+
+          <div class="row g-3">
+            <div class="col-12">
+              <label for="titleInput" class="form-label">Research title</label>
+              <input
+                id="titleInput"
+                name="title"
+                class="form-control"
+                type="text"
+                maxlength="200"
+                required
+              >
+              <div class="invalid-feedback">
+                Enter a research title of up to 200 characters.
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="descriptionInput" class="form-label">
+                Research description
+              </label>
+              <textarea
+                id="descriptionInput"
+                name="description"
+                class="form-control"
+                rows="4"
+                maxlength="16000"
+                required
+              ></textarea>
+              <div class="invalid-feedback">
+                Enter a description of up to 16,000 characters.
+              </div>
+            </div>
+
+            <div class="col-12 col-sm-6">
+              <label for="areaInput" class="form-label">Research area</label>
+              <input
+                id="areaInput"
+                name="research_area"
+                class="form-control"
+                type="text"
+                maxlength="100"
+                required
+              >
+              <div class="invalid-feedback">
+                Enter a research area of up to 100 characters.
+              </div>
+            </div>
+
+            <div class="col-12 col-sm-6">
+              <label for="facultyInput" class="form-label">Faculty member</label>
+              <input
+                id="facultyInput"
+                name="faculty_name"
+                class="form-control"
+                type="text"
+                maxlength="150"
+                required
+              >
+              <div class="invalid-feedback">
+                Enter a faculty name of up to 150 characters.
+              </div>
+            </div>
+
+            <div class="col-12 col-sm-6">
+              <label for="departmentInput" class="form-label">Department</label>
+              <input
+                id="departmentInput"
+                name="department"
+                class="form-control"
+                type="text"
+                maxlength="150"
+                required
+              >
+              <div class="invalid-feedback">
+                Enter a department of up to 150 characters.
+              </div>
+            </div>
+
+            <div class="col-12 col-sm-6">
+              <label for="positionsInput" class="form-label">
+                Available positions
+              </label>
+              <input
+                id="positionsInput"
+                name="positions_available"
+                class="form-control"
+                type="number"
+                min="1"
+                max="2147483647"
+                step="1"
+                required
+              >
+              <div class="invalid-feedback">
+                Enter a whole number between 1 and 2,147,483,647.
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="skillsInput" class="form-label">Required skills</label>
+              <textarea
+                id="skillsInput"
+                name="required_skills"
+                class="form-control"
+                rows="2"
+                maxlength="16000"
+                required
+              ></textarea>
+              <div class="invalid-feedback">
+                Enter required skills of up to 16,000 characters.
+              </div>
+            </div>
+
+            <div class="col-12 col-sm-6">
+              <label for="deadlineInput" class="form-label">
+                Application deadline
+              </label>
+              <input
+                id="deadlineInput"
+                name="application_deadline"
+                class="form-control"
+                type="date"
+                required
+              >
+              <div class="invalid-feedback">
+                Choose today or a future date.
+              </div>
+            </div>
+
+            <div class="col-12 col-sm-6">
+              <label for="statusInput" class="form-label">Status</label>
+              <select
+                id="statusInput"
+                name="status"
+                class="form-select"
+                required
+              >
+                <option value="Open">Open</option>
+                <option value="Closed">Closed</option>
+              </select>
+              <div class="invalid-feedback">
+                Choose Open or Closed.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            Cancel
+          </button>
+          <button id="saveOpportunityButton" type="submit" class="btn btn-primary">
+            Create opportunity
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </body>

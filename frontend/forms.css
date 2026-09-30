@@ -1,0 +1,49 @@
+.toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--portal-primary);
+  --bs-btn-border-color: var(--portal-primary);
+  --bs-btn-hover-bg: #1c4788;
+  --bs-btn-hover-border-color: #1c4788;
+  --bs-btn-active-bg: #173b72;
+  --bs-btn-active-border-color: #173b72;
+  --bs-btn-disabled-bg: var(--portal-primary);
+  --bs-btn-disabled-border-color: var(--portal-primary);
+}
+
+.form-label {
+  color: var(--portal-ink);
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.form-control,
+.form-select {
+  border-color: var(--portal-border);
+  border-radius: 10px;
+  padding: 0.7rem 0.85rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--portal-primary);
+  box-shadow: 0 0 0 0.2rem rgb(36 88 166 / 12%);
+}
+
+textarea.form-control {
+  resize: vertical;
+}
+
+@media (max-width: 767px) {
+  .section-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .toolbar-actions {
+    width: 100%;
+  }
+}
