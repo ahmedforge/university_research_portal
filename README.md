@@ -409,9 +409,11 @@ Frontend screenshots will be added during final submission preparation.
 
 ## Demonstration video
 
-A demonstration video of no more than 60 seconds will be added before
-submission. It will show the running frontend and backend, CRUD actions,
-closing an opportunity, error handling, and Postman requests and responses.
+[Watch the demonstration](docs/demo.webm)
+
+Duration: approximately 59.21 seconds.
+
+The video is included in the repository and final submission.
 
 ## Assignment scope
 
