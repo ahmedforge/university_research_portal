@@ -7,7 +7,11 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import ResearchOpportunity
-from app.schemas import OpportunityCreate, OpportunityResponse
+from app.schemas import (
+    OpportunityCreate,
+    OpportunityResponse,
+    OpportunityUpdate,
+)
 
 
 router = APIRouter(
@@ -99,5 +103,48 @@ def get_opportunity(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Research opportunity not found.",
         )
+
+    return opportunity
+
+
+@router.put(
+    "/{opportunity_id}",
+    response_model=OpportunityResponse,
+    responses={
+        400: {"description": "Invalid opportunity data or ID"},
+        404: {"description": "Opportunity not found"},
+        500: {"description": "Database operation failed"},
+    },
+)
+def update_opportunity(
+    opportunity_id: Annotated[int, Path(ge=1, le=2147483647)],
+    payload: OpportunityUpdate,
+    db: Annotated[Session, Depends(get_db)],
+) -> ResearchOpportunity:
+    """Update only the fields supplied for an existing opportunity."""
+    try:
+        opportunity = db.get(ResearchOpportunity, opportunity_id)
+
+        if opportunity is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Research opportunity not found.",
+            )
+
+        update_data = payload.model_dump(exclude_unset=True)
+
+        for field_name, field_value in update_data.items():
+            setattr(opportunity, field_name, field_value)
+
+        db.commit()
+        db.refresh(opportunity)
+    except HTTPException:
+        raise
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to update the research opportunity.",
+        ) from None
 
     return opportunity
